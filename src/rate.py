@@ -2,12 +2,15 @@ import numpy as np
 import pandas as pd
 import os
 
+from utils import get_file_paths
+
 file_location = "data/processed/MaxMinNormalized/"
 output_location = "data/processed/NormalizedWithScore/"
 
-for file_name in os.listdir(file_location):
-    file_path = os.path.join(file_location, file_name)
-    output_path = os.path.join(output_location, file_name)
+file_paths = get_file_paths(file_location)
+output_paths = get_file_paths(output_location)
+
+for index, file_path in enumerate(file_paths):
     df = pd.read_csv(file_path)
     weights = []
 
@@ -24,4 +27,4 @@ for file_name in os.listdir(file_location):
     weights = list(map(lambda x: x / total_value, weights))
 
     df['score'] = weights[0] * df['pH*'] + weights[1] * df['DO'] + weights[2] * df['CODMn'] + weights[3] * df['NH3-N']
-    df.to_csv(output_path)
+    df.to_csv(output_paths[index])
