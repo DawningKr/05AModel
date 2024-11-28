@@ -19,7 +19,7 @@ for file_path in file_paths:
         locations = df['点位名称']
 
 # add statistical meaning to the result -> average score per month
-result /= 17
+result /= 24
 index_order = result.argsort()[::-1]
 locations = locations[index_order]
 locations.reset_index(drop=True, inplace=True)

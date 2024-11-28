@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 
-from utils import get_file_paths
+from utils import *
 
 K = 0.2
 
@@ -28,6 +28,7 @@ NH3N_result['观测时间'] = years
 
 for i, pollution_file_path in enumerate(pollution_file_paths[10: -5]):
     water_speed_yearly = water_speed.iloc[i][1:].astype(float).to_list()
+    water_flow_yearly = water_flow.iloc[i][1:].astype(float).to_list()
     df = pd.read_csv(pollution_file_path)
     CODMns = df['CODMn'].to_list()[:7]
     NH3Ns = df['NH3-N'].to_list()[:7]
@@ -35,15 +36,17 @@ for i, pollution_file_path in enumerate(pollution_file_paths[10: -5]):
     pre_NH3N = 0
     for j, location in enumerate(locations):
         if j == 0:
-            CODMn_result.at[i, location] = CODMns[0]
-            pre_CODMn = CODMns[0]
-            NH3N_result.at[i, location] = NH3Ns[0]
-            pre_NH3N = NH3Ns[0]
+            pre_CODMn = calculate_pollution_flow(0, CODMns[0], water_flow_yearly[j], 0)
+            CODMn_result.at[i, location] = pre_CODMn
+            pre_NH3N = calculate_pollution_flow(0, NH3Ns[0], water_flow_yearly[j], 0)
+            NH3N_result.at[i, location] = pre_NH3N
             continue
-        CODMn_result.at[i, location] = CODMns[j] + pre_CODMn * np.exp(-K * location_distance[j] / np.mean([water_speed_yearly[j-1], water_speed_yearly[j]]))
-        pre_CODMn = CODMn_result.iloc[i][location]
-        NH3N_result.at[i, location] = NH3Ns[j] + pre_NH3N * np.exp(-K * location_distance[j] / np.mean([water_speed_yearly[j-1], water_speed_yearly[j]]))
-        pre_CODMn = CODMn_result.iloc[i][location]
+        alpha = get_alpha(location_distance[j], 
+                          water_speed=mean(water_speed_yearly[j-1], water_speed_yearly[j]))
+        pre_CODMn = calculate_pollution_flow(pre_CODMn, CODMns[j], water_flow_yearly[j], alpha)
+        pre_NH3N = calculate_pollution_flow(pre_NH3N, NH3Ns[j], water_flow_yearly[j], alpha)
+        CODMn_result.at[i, location] = pre_CODMn
+        NH3N_result.at[i, location] = pre_NH3N
 
 CODMn_result.to_csv('data/result/CODMnResult.csv')
 NH3N_result.to_csv('data/result/NH3NResult.csv')
