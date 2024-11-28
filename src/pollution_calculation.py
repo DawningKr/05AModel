@@ -48,5 +48,5 @@ for i, pollution_file_path in enumerate(pollution_file_paths[10: -5]):
         CODMn_result.at[i, location] = pre_CODMn
         NH3N_result.at[i, location] = pre_NH3N
 
-CODMn_result.to_csv('data/result/CODMnResult.csv')
-NH3N_result.to_csv('data/result/NH3NResult.csv')
+CODMn_result.to_csv('data/result/CODMnResult.csv', index=False)
+NH3N_result.to_csv('data/result/NH3NResult.csv', index=False)
